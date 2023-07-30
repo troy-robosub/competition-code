@@ -491,11 +491,16 @@ def adjust_angle_neg(angle):
     roll(-radians)
     time.sleep(2)
     roll(0)
+
+set_mode("ALT_HOLD")
+count =0
 while True:
     #move forward
     if detect == False:
+        count +=1
         #set mode to stabilize or alt_hold?
-        manualControl(500, 0, 500, 0)
+        if count < 25:
+            manualControl(500, 0, 500, 0)
     #detect red rectangles
     _, frame = cap.read()
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
