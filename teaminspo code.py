@@ -408,4 +408,16 @@ print("<<<<<<<HEARTBEAT RECEIVED>>>>>>")
 
 
 master.arducopter_arm()
-manualControl(0,500,500,0)
+goDepth(0.5)
+time.sleep(5)
+
+set_mode("ALT_HOLD")
+for i in range(0,4):
+    manualControl(500,0,500,0)
+time.sleep(5)
+
+for i in range(0,4):
+    manualControl(0,500,500,0)
+time.sleep(5)
+
+
