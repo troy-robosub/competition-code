@@ -12,7 +12,7 @@ sudo apt-get install -y python-dev python-pip python3-dev python3-pip python3-ro
 sudo apt-get install -y ros-melodic-mavros ros-melodic-mavros-extras
 wget https://raw.githubusercontent.com/mavlink/mavros/master/mavros/scripts/install_geographiclib_datasets.sh
 chmod a+x install_geographiclib_datasets.sh
-./install_geographiclib_datasets.sh
+sudo ./install_geographiclib_datasets.sh
 sudo pip install pymavlink
 sudo pip3 install pymavlink
 sudo pip install opencv-python
