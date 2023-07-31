@@ -7,11 +7,13 @@ import math
 import itertools
 #############################################################################################################################################################################
 # Create the connection
-master = mavutil.mavlink_connection('udp:192.168.2.1:14550')
+master = mavutil.mavlink_connection('/dev/ttyACM0', baud=57600)
 
 #ensure connection is valid
 master.wait_heartbeat()
 print("Hi")
+
+time.sleep(10)
 
 def check_direction():
     if centery > slope*centerx + yintercept and slope < 0:   
@@ -440,7 +442,7 @@ goDepth(y)
 cap = cv2.VideoCapture(0)
 error_check = 0
 scale = True
-real_height = 0.08 #meters
+real_height = 0.6 #meters
 pixel_height = 0
 detect = False
 rotate = 0
@@ -499,7 +501,7 @@ while True:
     if detect == False:
         count +=1
         #set mode to stabilize or alt_hold?
-        if count < 25:
+        if count < 40:
             manualControl(500, 0, 500, 0)
     #detect red rectangles
     _, frame = cap.read()
@@ -621,7 +623,7 @@ while True:
                     break
                 else:
                     break
-
+            time.sleep(5)
             for i in range(0,3):
                 move_left()  
 
