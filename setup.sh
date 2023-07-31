@@ -21,5 +21,5 @@ sudo pip install numpy
 sudo pip3 install numpy
 sudo pip install pyserial
 sudo pip3 install pyserial
-sudo echo "sudo pip uninstall pyserial" >> ~/.bashrc
+sudo echo "sudo pip3 uninstall pyserial" >> ~/.bashrc
 sudo echo "sudo pip3 install pyserial" >> ~/.bashrc
