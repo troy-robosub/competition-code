@@ -435,7 +435,7 @@ def maintainHeading(heading):
 #############################################################################################################################################################################
 #ARM THE SUB DUMMY
 master.arducopter_arm()
-y = 0.5 #meters for # of feet we want to go down.
+y = 1.22 #meters for # of feet we want to go down.
 goDepth(y)
 
 #make robot move forward til the gate is detected for a while
