@@ -136,15 +136,15 @@ def getDepth():
                 #6th item of list will be split by commas so.. [1,6] and then the first item will be returned so 1
                 #depth = 1 in this example  
                 depth = data[5].split(",")[0]
+                print("success1")
             #when depth can't be split into all of the above, returns as empty
             except:
-                print("error")
-                print('')
+                print('flop2')
             #print the depth out
             print("Current Depth: ", depth)
         #as soon as the depth is detected, and isn't 0 (which is what the fucntion sets it to)
         if not depth == 0:
-            print(depth)
+            print("flop3")
             #break the infinite loop
             break
     #return the detected depth
@@ -234,7 +234,7 @@ def goDepth(depth):
         print("REACHED DESIRED Depth: ", getDepth())
 
         #get mode to DEPTH_HOLD
-        mode = 'DEPTH_HOLD'
+        mode = 'ALT_HOLD'
         #get the mode id
         mode_id = master.mode_mapping()[mode]
         #set the mode via message
@@ -255,7 +255,7 @@ def goDepth(depth):
                 break
         print("REACHED DESIRED Depth: ", getDepth())
         #self-explanatory
-        mode = 'DEPTH_HOLD'
+        mode = 'ALT_HOLD'
         mode_id = master.mode_mapping()[mode]
         master.mav.set_mode_send(
             master.target_system,
@@ -272,7 +272,7 @@ def travel_in_x(xThrottle, distanceTravel):
     #set mode to STABILIZE (prevents too much external movement) KEEPS PITCH AND ROLL STABLE SO WHEN CHANGING XTHROTTLE, MOVES FORWARD!! 
     #would probably work for roll as well  (vertical movement)
     #self-explanatory
-    mode = 'DEPTH_HOLD'
+    mode = 'ALT_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -306,7 +306,7 @@ def travel_in_x(xThrottle, distanceTravel):
     #print the distance reached
     print("REACHED DESIRED DISTANCE: ", distance)
     #self-explanatory, hold altitude
-    mode = 'DEPTH_HOLD'
+    mode = 'ALT_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -316,7 +316,7 @@ def travel_in_x(xThrottle, distanceTravel):
 #Function
 def rotateClockwise(degrees):
     #hold altitude and send message
-    mode = 'DEPTH_HOLD'
+    mode = 'ALT_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -341,7 +341,7 @@ def rotateClockwise(degrees):
     #print the rotation reached
     print("ROTATED: ", rotation)
     #hold altitude
-    mode = 'DEPTH_HOLD'
+    mode = 'ALT_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -350,7 +350,7 @@ def rotateClockwise(degrees):
 
 #similar to rotateClockwise but -250 instead of 250 (yaw)
 def rotateCounterClockwise(degrees):
-    mode = 'DEPTH_HOLD'
+    mode = 'ALT_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -366,7 +366,7 @@ def rotateCounterClockwise(degrees):
             break
 
     print("ROTATED: ", rotation)
-    mode = 'DEPTH_HOLD'
+    mode = 'ALT_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -376,7 +376,7 @@ def rotateCounterClockwise(degrees):
 # turn to and maintain heading that you give
 def maintainHeading(heading):
     #hold altitude
-    mode = 'DEPTH_HOLD'
+    mode = 'ALT_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -407,9 +407,29 @@ print("<<<<<<CONNECTION ESTABLISHED>>>>>>")
 boot_time = time.time()
 master.wait_heartbeat()
 print("<<<<<<<HEARTBEAT RECEIVED>>>>>>")
+master.arducopter_arm()
 
-time.sleep(10)
+#get velocity
+print("velocity:")
+print(get_velocity())
 
-travel_in_x(700,4)
+#test travel_in_x
+print("traveling in x")
+travel_in_x(700,0,500,0)
+
+#test traveling in y direction
+print("traveling in y")
+manualControl(0,700,500,0)
+
+#print DEPTH
+print("depth:")
+print(getDepth())
+
+#rotate
+print("rotatation")
+rotateClockwise()
+rotateClockwise()
+print("done")
+
 
 
