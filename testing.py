@@ -108,15 +108,6 @@ while True:
             roll(math.pi/2)
         else:
             roll(0)
-
-    # Display the image
-    cv2.imshow('result', frame)
-    cv2.imshow('mask', mask)
-
-    # Exit on 'q' key press
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
 # Release camera and close windows
 cap.release()
 cv2.destroyAllWindows()
