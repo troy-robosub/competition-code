@@ -270,7 +270,7 @@ def travel_in_x(xThrottle, distanceTravel):
     #set mode to STABILIZE (prevents too much external movement) KEEPS PITCH AND ROLL STABLE SO WHEN CHANGING XTHROTTLE, MOVES FORWARD!! 
     #would probably work for roll as well  (vertical movement)
     #self-explanatory
-    mode = 'STABILIZE'
+    mode = 'DEPTH_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -304,7 +304,7 @@ def travel_in_x(xThrottle, distanceTravel):
     #print the distance reached
     print("REACHED DESIRED DISTANCE: ", distance)
     #self-explanatory, hold altitude
-    mode = 'ALT_HOLD'
+    mode = 'DEPTH_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -314,7 +314,7 @@ def travel_in_x(xThrottle, distanceTravel):
 #Function
 def rotateClockwise(degrees):
     #hold altitude and send message
-    mode = 'ALT_HOLD'
+    mode = 'DEPTH_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -339,7 +339,7 @@ def rotateClockwise(degrees):
     #print the rotation reached
     print("ROTATED: ", rotation)
     #hold altitude
-    mode = 'ALT_HOLD'
+    mode = 'DEPTH_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -348,7 +348,7 @@ def rotateClockwise(degrees):
 
 #similar to rotateClockwise but -250 instead of 250 (yaw)
 def rotateCounterClockwise(degrees):
-    mode = 'ALT_HOLD'
+    mode = 'DEPTH_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -364,7 +364,7 @@ def rotateCounterClockwise(degrees):
             break
 
     print("ROTATED: ", rotation)
-    mode = 'ALT_HOLD'
+    mode = 'DEPTH_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -374,7 +374,7 @@ def rotateCounterClockwise(degrees):
 # turn to and maintain heading that you give
 def maintainHeading(heading):
     #hold altitude
-    mode = 'ALT_HOLD'
+    mode = 'DEPTH_HOLD'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -406,18 +406,8 @@ boot_time = time.time()
 master.wait_heartbeat()
 print("<<<<<<<HEARTBEAT RECEIVED>>>>>>")
 
+time.sleep(10)
 
-master.arducopter_arm()
-goDepth(0.5)
-time.sleep(5)
-
-set_mode("ALT_HOLD")
-for i in range(0,4):
-    manualControl(500,0,500,0)
-time.sleep(5)
-
-for i in range(0,4):
-    manualControl(0,500,500,0)
-time.sleep(5)
+travel_in_x(700,4)
 
 
