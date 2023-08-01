@@ -18,6 +18,8 @@ master = mavutil.mavlink_connection('udp:192.168.2.1:14550')
 master.wait_heartbeat()
 print("Hi")
 
+master.arducopter_arm()
+time.sleep(8)
 #make a function 
 #box[0] = (x1, y1) =coord1
 #box[1] = (x2, y2) = coord2
