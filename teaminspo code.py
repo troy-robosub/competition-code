@@ -409,10 +409,6 @@ master.wait_heartbeat()
 print("<<<<<<<HEARTBEAT RECEIVED>>>>>>")
 master.arducopter_arm()
 
-#get velocity
-print("velocity:")
-print(get_velocity())
-
 #test travel_in_x
 print("traveling in x")
 travel_in_x(700,0,500,0)
