@@ -88,8 +88,8 @@ while True:
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     # Define range for red color in HSV
-    lower_red = np.array([0, 70, 50])
-    upper_red = np.array([10, 255, 255])
+    lower_red = np.array([25, 70, 50])
+    upper_red = np.array([35, 255, 255])
 
     # Threshold the HSV image to get only red colors
     mask = cv2.inRange(hsv, lower_red, upper_red)
@@ -100,7 +100,7 @@ while True:
     # Loop over the contours
     for contour in contours:
         # If the contour is sufficiently large, it might be a red object
-        if cv2.contourArea(contour) > 500:
+        if cv2.contourArea(contour) > 400:
             # Compute the bounding box for the contour and draw it on the frame
             (x, y, w, h) = cv2.boundingRect(contour)
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
