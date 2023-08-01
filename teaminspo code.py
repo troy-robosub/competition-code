@@ -138,11 +138,13 @@ def getDepth():
                 depth = data[5].split(",")[0]
             #when depth can't be split into all of the above, returns as empty
             except:
+                print("error")
                 print('')
             #print the depth out
             print("Current Depth: ", depth)
         #as soon as the depth is detected, and isn't 0 (which is what the fucntion sets it to)
         if not depth == 0:
+            print(depth)
             #break the infinite loop
             break
     #return the detected depth
