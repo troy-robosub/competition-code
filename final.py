@@ -499,10 +499,7 @@ count =0
 while True:
     #move forward
     if detect == False:
-        count +=1
-        #set mode to stabilize or alt_hold?
-        if count < 40:
-            manualControl(500, 0, 500, 0)
+        manualControl(500, 0, 500, 0)
     #detect red rectangles
     _, frame = cap.read()
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
