@@ -624,8 +624,9 @@ while True:
             for i in range(0,3):
                 move_left()  
 
+            travel_in_x(1)
             #Draw the line
-            cv2.line(frame, edge_points[0], edge_points[1], (255,0,0), 2)
+            #cv2.line(frame, edge_points[0], edge_points[1], (255,0,0), 2)
             
 
     distance = None
@@ -638,13 +639,6 @@ while True:
             distance = distance * scale *100 #*100 = centimeters
 
     print(f"Area 1: {area1} pixels, Area 2: {area2} pixels, Distance: {distance}")
-
-    cv2.imshow('result', frame)
-    cv2.imshow('mask', mask1)
-
-    # Exit on 'q' key press
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
 
 # Release camera and close windows
 cap.release()
