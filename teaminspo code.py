@@ -107,6 +107,7 @@ def manualControl(x, y, z, r):
         z,  # thrust for sub, slider on joystick [0,1000]
         r,  # yaw for sub, clockwise/counterclockwise on joystick [-1000,1000], respectively
         0)  # buttons
+    time.sleep(0.2)
 
 
 #Function
