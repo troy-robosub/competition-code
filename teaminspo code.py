@@ -1,161 +1,32 @@
-#??
-from sys import _current_frames
 #pymavlink to communicate with pixhawk
 from pymavlink import mavutil
 #timing
 import time
-#??
-import argparse
 #math operations
 import math
 
 
-# Create the connection
-master = mavutil.mavlink_connection('udp:192.168.2.1:14550')
+def set_mode(modep):
+    mode = modep
+    mode_id = master.mode_mapping()[mode]
+    master.mav.set_mode_send(
+        master.target_system, #target system
+        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, #custom_mode is the mode we are setting
+        mode_id) #mode_id is the mode we are setting it to (previous code)
+    print("<<<<<<MODE CHANGED TO ", mode, ">>>>>>")
 
-#ensure connection is valid
-master.wait_heartbeat()
-print("Hi")
-
-#ensure connection is valid
-master.wait_heartbeat()
-#############################################################################################################################################################################
-
-#Description of pitch,roll, yaw
-
-################################################################################################################################################
-#                                |                                                  |                                                          #
-#                                |                                                  |                         0 yaw                            #
-#                                |                                                  |                           ^                              #
-#                                |                       0 roll                     |    |\                     |                    /\        #
-#         \                      |         |\             ^             /|          |      \  -yaw              |           +yaw    /          #
-#         \\\     +pitch         |           \            |            /            |       \                   |                  /           #
-#           \                    |  +roll     \           |           /    -roll    |       ____--\        |---------|        /--____          #
-#            \    ____________   |             \  (-----\----/----)  /              |    \--       \       |         |       /       --/       #
-#             \  |            |  |              \(-------\--/------)/               |     \         \      |         |      /         /        #
-#  <===========  |   0 pitch  |  |              (---------\/--------)               |      \         \     |         |     /         /         #
-#             /  |____________|  |              (---------/\--------)               |       \         \    |         |    /         /          #
-#            /                   |               (-------/--\------)                |        \         \   |         |   /         /           #
-#           /                    |                (-----/----\----)                 |         \         \  |         |  /         /            #
-#         ///    -pitch          |                                                  |          \   ____--\ |_________| /--____   /             #
-#         /                      |                                                  |           \--                           --/              #
-#                                |                                                  |                                                          #
-#                                |                                                  |                                                          #
-#            (SIDE VIEW)         |                   (BACK VIEW)                    |                       (TOP VIEW)                         #
-################################################################################################################################################
-
-#                        STABILIZE
-##############################################################
-#    Stabilize mode allows you to fly the sub manually,      #
-#  but it will automatically level the roll and pitch axis   #
-##############################################################
-
-'''
-MANUAL: This mode allows the sub to be flown manually, but it will automatically level the roll and pitch axis.
-STABILIZE: This mode allows the sub to be flown manually, but it will automatically level the roll and pitch axis.
-DEPTH HOLD: This mode maintains the sub's depth at a constant value.
-ALTITUDE HOLD: This mode maintains the sub's altitude at a constant value.
-POSITION HOLD: This mode maintains the sub's position at a constant value.
-AUTO: This mode allows the sub to follow a pre-programmed mission plan.
-MISSION: This mode allows the sub to follow a pre-programmed mission plan.
-LOITER: This mode maintains the sub's position and altitude at a constant value.
-RETURN TO LAUNCH: This mode returns the sub to its launch location and lands it.
-LAND: This mode lands the sub at its current location.
-TAKEOFF: This mode takes off from the sub's current location.
-FOLLOW: This mode follows a target.
-OFFBOARD: This mode allows the sub to be controlled by an external computer.
-ACRO: This mode allows the sub to be flown in acrobatic mode.
-SURFACE: This mode brings the sub to the surface.
-FLIP: This mode flips the sub.
-FLOWHOLD: This mode maintains the sub's position using optical flow.
-DRIFT: This mode allows the sub to drift with the current.
-SPORT: This mode allows the sub to be flown in sport mode.
-THROW: This mode throws the sub.
-AUTOTUNE: This mode tunes the sub's PID parameters automatically.
-AVOID_ADSB: This mode avoids collisions with other aircraft using ADS-B.
-GUIDED: This mode allows the sub to be guided to a specific location.
-INITIALISING: This mode is used during initialization.
-QSTABILIZE: This mode allows a quadrotor to be flown in stabilize mode.
-QHOVER: This mode allows a quadrotor to hover.
-QLOITER: This mode allows a quadrotor to loiter.
-QLAND: This mode allows a quadrotor to land.
-QRTL: This mode allows a quadrotor to return to launch.
-QAUTOTUNE: This mode tunes a quadrotor's PID parameters automatically.
-QACRO: This mode allows a quadrotor to be flown in acrobatic mode.
-THERMAL: This mode allows the sub to follow a thermal.
-SHUT_DOWN: This mode shuts down the sub.
-REBOOT: This mode reboots the sub.
-SENSORS: This mode tests the sub's sensors.
-'''
-
-
-#Function to provide Manual Controls. For example sendng this with a certain set of numbers will simulate moving the joystick forward.
 def manualControl(x, y, z, r):
-
-    # master.mav.<command>(args) is the syntax to communivate with pixhawk
-    # manual_control_send uses the mavlink message MANUAL_CONTROL. The _send is used to indicate that the message is being sent
-    # messages are meant to be sent, so most messages will be in the format PIXHAWK_MESSAGE_send. recv is not a suffix.
-    
     master.mav.manual_control_send(
-
-        #this means the pixhawk you are connected to (sets target system to "master")
         master.target_system,
-
-
         x,  # pitch for sub, back/forward on joystick [-1000,1000], respectively
         y,  # roll for sub, left/right on joystick [-1000,1000], respectively
         z,  # thrust for sub, slider on joystick [0,1000]
         r,  # yaw for sub, clockwise/counterclockwise on joystick [-1000,1000], respectively
         0)  # buttons
-    time.sleep(0.2)
+    time.sleep(0.3)
 
 
-#Function
-def getDepth():
-    #set initial depth variable = 0
-    depth = 0
-    #infinite loop
-    while True:
-        #recv_match() is for capturing messages with particular names or field values
-        #without arguments, it will just look for the next message without specifications
-        #so msg is the variable used to store messages
-        msg = master.recv_match()
-        #if there is not a message,
-        if not msg:
-            # continue to the next iteration of loop, which means check if there is a new message
-            continue
-        #If the message type in message is VFR_HUD,
-        #https://mavlink.io/en/messages/common.html#VFR_HUD
-        #Basically if the message is a metric typically displayed on a HUD for the sub,
-        if msg.get_type() == 'VFR_HUD':
-            #set a variable data to the string version of the msg
-            data = str(msg)
-            #data will come as smth like 11:12:13:14:15:16:17:18:19:20
-            try:
-                #data will be split into a list, so [11,12,13,14,15,16,17,18,19,20]
-                data = data.split(":")
-                #6th item of list will be split by commas so.. [1,6] and then the first item will be returned so 1
-                #depth = 1 in this example  
-                depth = data[5].split(",")[0]
-                print("success1")
-            #when depth can't be split into all of the above, returns as empty
-            except:
-                print('flop2')
-            #print the depth out
-            print("Current Depth: ", depth)
-        #as soon as the depth is detected, and isn't 0 (which is what the fucntion sets it to)
-        if not depth == 0:
-            print("flop3")
-            #break the infinite loop
-            break
-    #return the detected depth
-    return float(depth)
-
-# very similar to getDepth
-# only change is the data split, which means the messages are being in sent in such a way that it is like
-# value,thing1 : value,thing2 : value,thing3 :  ... 
-#so like data[1] after the split with : would return value,thing2
-# which would then be split again and only return value
+#check for velocity in Qgroundcontrol
 def get_velocity():
     velocity = 0
     while True:
@@ -166,6 +37,7 @@ def get_velocity():
             data = str(msg)
             try:
                 data = data.split(":")
+                print(data, "velocity")
                 speed = data[2].split(",")[0]
             except:
                 print('')
@@ -176,7 +48,35 @@ def get_velocity():
 
     return velocity
 
-#similar to getDepth and getVelocity
+def getPressure():
+    while True:
+        msg = master.recv_match()
+        if not msg:
+            continue
+        if msg.get_type() == 'SCALED_PRESSURE2':
+            data = str(msg)
+            try:
+                data = data.split(":")
+                print(data, "pressure")
+                pressure = data[3].split(",")[0]
+            except:
+                print('')
+            pressure = float(pressure)
+        return pressure
+    
+def getDepth(pressure):
+    pressure = getPressure()
+    P = pressure * 100
+    g = 9.80665
+    p = 1023.6
+    depth = P/(p*g)
+    if pressure >= 0:
+        return depth
+    elif pressure < 0:
+        depth = -depth
+        return depth
+
+#check for heading in Qgroundcontrol
 def get_heading():
     heading = 0
     while True:
@@ -196,8 +96,7 @@ def get_heading():
 
     return heading
 
-
-#Function
+#dependent on getDepth()
 def goDepth(depth):
     #set the desired operating mode
     #why STABILIZE?
@@ -263,12 +162,7 @@ def goDepth(depth):
             mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
             mode_id)
     
-
-
-    
-    
-
-#Function
+#dependent on get_velocity()
 def travel_in_x(xThrottle, distanceTravel):
     #set mode to STABILIZE (prevents too much external movement) KEEPS PITCH AND ROLL STABLE SO WHEN CHANGING XTHROTTLE, MOVES FORWARD!! 
     #would probably work for roll as well  (vertical movement)
@@ -280,7 +174,7 @@ def travel_in_x(xThrottle, distanceTravel):
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id)
     #print mode
-    print("<<<<<<MODE CHANGED TO ", mode, ">>>>>>")
+    print("<<<<<<MODE CHANGED TO ", mode, ">>>>>> travel_in_x")
     #start timer
     start = time.time()
     #create an array to store velocity values
@@ -314,7 +208,7 @@ def travel_in_x(xThrottle, distanceTravel):
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id)
 
-#Function
+#dependent on get_heading()
 def rotateClockwise(degrees):
     #hold altitude and send message
     mode = 'ALT_HOLD'
@@ -348,8 +242,6 @@ def rotateClockwise(degrees):
         master.target_system,
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id)
-
-#similar to rotateClockwise but -250 instead of 250 (yaw)
 def rotateCounterClockwise(degrees):
     mode = 'ALT_HOLD'
     mode_id = master.mode_mapping()[mode]
@@ -373,8 +265,6 @@ def rotateCounterClockwise(degrees):
         master.target_system,
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id)
-
-# turn to and maintain heading that you give
 def maintainHeading(heading):
     #hold altitude
     mode = 'ALT_HOLD'
@@ -395,38 +285,41 @@ def maintainHeading(heading):
         rotateCounterClockwise(angle)
     
         
-
-        
-
-    
-    
+master = mavutil.mavlink_connection('udp:192.168.2.1:14550') # Create the connection
 
 
-#wait for the connection
+print("<<<<<<WAITING FOR CONNECTION>>>>>>")
+master.wait_heartbeat() #ensure connection is valid
 print("<<<<<<CONNECTION ESTABLISHED>>>>>>")
-#self-explanatory
-boot_time = time.time()
-master.wait_heartbeat()
-print("<<<<<<<HEARTBEAT RECEIVED>>>>>>")
+
+
 master.arducopter_arm()
 
-#test travel_in_x
-print("traveling in x")
-travel_in_x(700,0,500,0)
 
-#test traveling in y direction
+print("DESCENDINGGGGGGGGG")
+for i in range(0,10):
+    manualControl(0,0,300,0)
+
+set_mode("ALT_HOLD")
+print("Hold for 7 seconds")
+time.sleep(7)
+
+
 print("traveling in y")
-manualControl(0,700,500,0)
+for i in range(0,5):
+    manualControl(0,700,500,0)
 
-#print DEPTH
-print("depth:")
-print(getDepth())
+print("moving forward? after 7 seconds")
+time.sleep(7)
+travel_in_x(700, 1)
 
-#rotate
-print("rotatation")
-rotateClockwise()
-rotateClockwise()
-print("done")
+time.sleep(5)
 
+print("descending")
+goDepth(0.4)
+print("finished")
+
+time.sleep(5)
+master.arducopter_disarm()
 
 
