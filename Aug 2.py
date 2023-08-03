@@ -1,5 +1,6 @@
 #pymavlink to communicate with pixhawk
 #param_set_send
+
 from pymavlink import mavutil
 #timing
 import numpy as np
@@ -9,6 +10,8 @@ import math
 
 pressure = None
 
+def paraeters():
+    return
 def set_mode(modep):
     mode = modep
     mode_id = master.mode_mapping()[mode]
