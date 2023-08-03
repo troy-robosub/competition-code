@@ -10,7 +10,13 @@ import math
 
 pressure = None
 
-def paraeters():
+def parameters(param,value):
+    master.mav.param_set_send(
+    master.target_system,
+    1,
+    param,
+    value
+    )
     return
 def set_mode(modep):
     mode = modep
@@ -297,8 +303,12 @@ set_mode("MANUAL")
 master.arducopter_arm()
 print("ARMED")
 
+set_parameters("ATC_ANG_RLL_P", 6.0)
+set_parameters("ATC_RAT_PIT_P", 0.10)
+set_parameters("ATC_RAT_PIT_I", 0.11)
+set_parameters("ATC_RAT_PIT_D", 0.012)
 
-for i in range(0,11):
+for i in range(0,9):
         manualControl(0,0,1000,0)
 print("DONE")
 
