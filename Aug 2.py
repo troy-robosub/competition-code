@@ -10,14 +10,13 @@ import math
 
 pressure = None
 
-def parameters(param,value):
+def set_parameters(param,value):
     master.mav.param_set_send(
     master.target_system,
-    1,
+    master.target_component,
     param,
     value
     )
-    return
 def set_mode(modep):
     mode = modep
     mode_id = master.mode_mapping()[mode]
@@ -75,7 +74,7 @@ def getPressure():
             except:
                 print('')
         return pressure
-    
+
 
 def getDepth():
     pressure = initial_pressure - getPressure()
@@ -113,7 +112,7 @@ def goDepth(depth):
     #https://ardupilot.org/dev/docs/apmcopter-programming-advanced.html
     mode = 'STABILIZE'
     # get the mode id from the mode_mapping dictionary
-    # The code master.mode_mapping()[mode] is accessing a dictionary of mode mappings 
+    # The code master.mode_mapping()[mode] is accessing a dictionary of mode mappings
     # stored in the "master" object and returning the value associated with the key mode.
     #https://mavlink.io/en/messages/common.html#MAV_MODE_FLAG
     mode_id = master.mode_mapping()[mode]
@@ -124,7 +123,7 @@ def goDepth(depth):
         #https://mavlink.io/en/messages/common.html#MAV_MODE_FLAG
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,#custom_mode is the mode we are setting
         mode_id)#mode_id is the mode we are setting it to (previous code)
-    
+
     #set the depth you are currently at
     current_depth = abs(getDepth())
 
@@ -171,10 +170,10 @@ def goDepth(depth):
             master.target_system,
             mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
             mode_id)
-    
+
 #dependent on get_velocity()
 def travel_in_x(xThrottle, distanceTravel):
-    #set mode to STABILIZE (prevents too much external movement) KEEPS PITCH AND ROLL STABLE SO WHEN CHANGING XTHROTTLE, MOVES FORWARD!! 
+    #set mode to STABILIZE (prevents too much external movement) KEEPS PITCH AND ROLL STABLE SO WHEN CHANGING XTHROTTLE, MOVES FORWARD!!
     #would probably work for roll as well  (vertical movement)
     #self-explanatory
     mode = 'ALT_HOLD'
@@ -283,16 +282,16 @@ def maintainHeading(heading):
     #calculate the difference in headings
     angle = start_heading - heading
     #if the angle is negative, rotate clockwise (increase heading)
-    if angle < 0: 
+    if angle < 0:
         rotateClockwise(abs(angle))
         time.sleep(1.5)
     #if the angle is positive, rotate counter-clockwise (decrease heading)
-    else: 
+    else:
         rotateCounterClockwise(abs(angle))
         time.sleep(1.5)
-    
-        
-master = mavutil.mavlink_connection('udp:192.168.2.1:14550') # Create the connection
+
+
+master = mavutil.mavlink_connection('/dev/ttyACM0', baud =57600) # Create the connection
 
 
 print("<<<<<<WAITING FOR CONNECTION>>>>>>")
@@ -352,5 +351,3 @@ time.sleep(5)
 
 
 master.arducopter_disarm()
-
-
