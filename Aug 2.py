@@ -1,4 +1,5 @@
 #pymavlink to communicate with pixhawk
+#param_set_send
 from pymavlink import mavutil
 #timing
 import numpy as np
@@ -294,7 +295,7 @@ master.arducopter_arm()
 print("ARMED")
 
 
-for i in range(0,4):
+for i in range(0,11):
         manualControl(0,0,1000,0)
 print("DONE")
 
