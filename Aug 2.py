@@ -302,10 +302,10 @@ set_mode("MANUAL")
 master.arducopter_arm()
 print("ARMED")
 
-set_parameters("ATC_ANG_RLL_P", 6.0)
-set_parameters("ATC_RAT_PIT_P", 0.10)
-set_parameters("ATC_RAT_PIT_I", 0.11)
-set_parameters("ATC_RAT_PIT_D", 0.012)
+set_parameters("ATC_ANG_RLL_P", 8.0)
+set_parameters("ATC_RAT_PIT_P", 0.08)
+set_parameters("ATC_RAT_PIT_I", 0.08)
+set_parameters("ATC_RAT_PIT_D", 0.00)
 
 for i in range(0,9):
         manualControl(0,0,1000,0)
