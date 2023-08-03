@@ -1,10 +1,12 @@
 #pymavlink to communicate with pixhawk
 from pymavlink import mavutil
 #timing
+import numpy as np
 import time
 #math operations
 import math
 
+pressure = None
 
 def set_mode(modep):
     mode = modep
@@ -22,50 +24,9 @@ def manualControl(x, y, z, r):
         y,  # roll for sub, left/right on joystick [-1000,1000], respectively
         z,  # thrust for sub, slider on joystick [0,1000]
         r,  # yaw for sub, clockwise/counterclockwise on joystick [-1000,1000], respectively
-        0)  # buttons
-    time.sleep(0.3)
-
-
-#check this for sure
-def getDepth():
-    #set initial depth variable = 0
-    depth = 0
-    #infinite loop
-    while True:
-        #recv_match() is for capturing messages with particular names or field values
-        #without arguments, it will just look for the next message without specifications
-        #so msg is the variable used to store messages
-        msg = master.recv_match()
-        #if there is not a message,
-        if not msg:
-            # continue to the next iteration of loop, which means check if there is a new message
-            continue
-        #If the message type in message is VFR_HUD,
-        #https://mavlink.io/en/messages/common.html#VFR_HUD
-        #Basically if the message is a metric typically displayed on a HUD for the sub,
-        if msg.get_type() == 'VFR_HUD':
-            #set a variable data to the string version of the msg
-            data = str(msg)
-            #data will come as smth like 11:12:13:14:15:16:17:18:19:20
-            try:
-                #data will be split into a list, so [11,12,13,14,15,16,17,18,19,20]
-                data = data.split(":")
-                #6th item of list will be split by commas so.. [1,6] and then the first item will be returned so 1
-                #depth = 1 in this example  
-                depth = data[5].split(",")[0]
-                print("success1")
-            #when depth can't be split into all of the above, returns as empty
-            except:
-                print('flop2')
-            #print the depth out
-            print("Current Depth: ", depth)
-        #as soon as the depth is detected, and isn't 0 (which is what the fucntion sets it to)
-        if not depth == 0:
-            print("flop3")
-            #break the infinite loop
-            break
-    #return the detected depth
-    return float(depth)
+        0
+        )  # buttons
+    time.sleep(0.5)
 
 #check for velocity in Qgroundcontrol
 def get_velocity():
@@ -78,6 +39,7 @@ def get_velocity():
             data = str(msg)
             try:
                 data = data.split(":")
+                print(data, "velocity")
                 speed = data[2].split(",")[0]
             except:
                 print('')
@@ -87,6 +49,32 @@ def get_velocity():
             break
 
     return velocity
+
+def getPressure():
+    while True:
+        pressure = None
+        msg = master.recv_match()
+        if not msg:
+            continue
+        if msg.get_type() == 'SCALED_PRESSURE2':
+            data = str(msg)
+            try:
+                data = data.split(":")
+                print(data, "pressure")
+                pressure = data[3].split(",")[0]
+            except:
+                print('')
+        return pressure
+    
+
+def getDepth():
+    pressure = initial_pressure - getPressure()
+    P = pressure * 100
+    g = 9.80665
+    p = 1023.6
+    depth = P/(p*g) *(-1)
+    return depth
+
 
 #check for heading in Qgroundcontrol
 def get_heading():
@@ -223,7 +211,7 @@ def travel_in_x(xThrottle, distanceTravel):
 #dependent on get_heading()
 def rotateClockwise(degrees):
     #hold altitude and send message
-    mode = 'ALT_HOLD'
+    mode = 'MANUAL'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -243,19 +231,20 @@ def rotateClockwise(degrees):
         manualControl(0, 0, 500, 250)
         #if the desired degrees rotated
         # is greater than the desired rotation (within 4%), stop
-        if rotation > 0.96 * degrees:
+        if rotation > 0.30 * degrees:
             break
     #print the rotation reached
     print("ROTATED: ", rotation)
     #hold altitude
-    mode = 'ALT_HOLD'
+    mode = 'MANUAL'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id)
+
 def rotateCounterClockwise(degrees):
-    mode = 'ALT_HOLD'
+    mode = 'MANUAL'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -267,11 +256,11 @@ def rotateCounterClockwise(degrees):
         print("Current heading: " , current_heading)
         rotation = abs(start_heading-current_heading)
         manualControl(0, 0, 500, -250)
-        if rotation > 0.96 * degrees:
+        if rotation > 0.30 * degrees:
             break
 
     print("ROTATED: ", rotation)
-    mode = 'ALT_HOLD'
+    mode = 'MANUAL'
     mode_id = master.mode_mapping()[mode]
     master.mav.set_mode_send(
         master.target_system,
@@ -279,12 +268,6 @@ def rotateCounterClockwise(degrees):
         mode_id)
 def maintainHeading(heading):
     #hold altitude
-    mode = 'ALT_HOLD'
-    mode_id = master.mode_mapping()[mode]
-    master.mav.set_mode_send(
-        master.target_system,
-        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
-        mode_id)
     #get the current heading
     start_heading = get_heading()
     #calculate the difference in headings
@@ -292,9 +275,11 @@ def maintainHeading(heading):
     #if the angle is negative, rotate clockwise (increase heading)
     if angle < 0: 
         rotateClockwise(abs(angle))
+        time.sleep(1.5)
     #if the angle is positive, rotate counter-clockwise (decrease heading)
     else: 
-        rotateCounterClockwise(angle)
+        rotateCounterClockwise(abs(angle))
+        time.sleep(1.5)
     
         
 master = mavutil.mavlink_connection('udp:192.168.2.1:14550') # Create the connection
@@ -304,13 +289,28 @@ print("<<<<<<WAITING FOR CONNECTION>>>>>>")
 master.wait_heartbeat() #ensure connection is valid
 print("<<<<<<CONNECTION ESTABLISHED>>>>>>")
 
-
+set_mode("MANUAL")
 master.arducopter_arm()
+print("ARMED")
 
+
+for i in range(0,4):
+        manualControl(0,0,1000,0)
+print("DONE")
+
+cnt = 0
+for i in range(0,50):
+    manualControl(750,0,500,0)
+#initial_pressure = getPressure()
+'''
+print("starting sleep")
+time.sleep(7)
+print("finished sleep")
 
 print("DESCENDINGGGGGGGGG")
+
 for i in range(0,10):
-    manualControl(0,0,300,0)
+    manualControl(0,0,100,0)
 
 set_mode("ALT_HOLD")
 print("Hold for 7 seconds")
@@ -325,5 +325,18 @@ print("moving forward? after 7 seconds")
 time.sleep(7)
 travel_in_x(700, 1)
 
+time.sleep(5)
+
+print("descending")
+goDepth(0.4)
+print("finished")
+
+time.sleep(5)
+'''
+
+#thomas funny
+
+
+master.arducopter_disarm()
 
 
