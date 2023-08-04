@@ -220,12 +220,8 @@ def travel_in_x(xThrottle, distanceTravel):
 #dependent on get_heading()
 def rotateClockwise(degrees):
     #hold altitude and send message
-    mode = 'MANUAL'
-    mode_id = master.mode_mapping()[mode]
-    master.mav.set_mode_send(
-        master.target_system,
-        mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
-        mode_id)
+    set_mode("MANUAL")
+    
     #the original heading of the vehicle.
     #what is heading? the compass direction in which the craft's nose is pointing
     #https://mavlink.io/en/messages/common.html#ATTITUDE
