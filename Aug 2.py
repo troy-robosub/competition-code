@@ -217,29 +217,54 @@ def travel_in_x(xThrottle, distanceTravel):
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id)
 
+def absolute_rotation_change(head1, head2): # i (derek) chatgpted this part so i hope it works
+    """
+    Calculate the absolute change in degrees between two headings.
+    Handles the special case when the rotation jumps from 359 to 0.
+
+    Parameters:
+        head1 (float): First heading in the range [0, 360).
+        head2 (float): Second heading in the range [0, 360).
+
+    Returns:
+        float: Absolute change in degrees between the headings.
+    """
+    # Normalize the headings to the range [0, 360)
+    head1 = head1 % 360
+    head2 = head2 % 360
+
+    # Calculate the absolute difference between the headings
+    abs_diff = abs(head1 - head2)
+
+    # Handle the special case when the rotation jumps from 359 to 0
+    if abs_diff > 180:
+        abs_diff = 360 - abs_diff
+
+    return abs_diff
+
 #dependent on get_heading()
 def rotateClockwise(degrees):
     #hold altitude and send message
     set_mode("MANUAL")
-    
+
     #the original heading of the vehicle.
     #what is heading? the compass direction in which the craft's nose is pointing
     #https://mavlink.io/en/messages/common.html#ATTITUDE
     start_heading = get_heading()
+    new_heading = (current_heading + degrees_to_turn) % 360
     #run this 10000000 times
     for i in range(10000000):
         #get current heading, usually after small shift in yaw
         current_heading = get_heading()
         #calculate the difference in rotation by degrees
-        rotation = abs(start_heading-current_heading)
         #rotate clockwise, no thrust
         manualControl(0, 0, 500, 250)
-        #if the desired degrees rotated
+        # if the desired degrees rotated
         # is greater than the desired rotation (within 4%), stop
-        if rotation > 0.30 * degrees:
+        if current_heading > 0.96 * new_heading or  current_heading < 1.04 * new_heading:
             break
     #print the rotation reached
-    print("ROTATED: ", rotation)
+        print("ROTATED: ", current_heading)
     #hold altitude
     mode = 'MANUAL'
     mode_id = master.mode_mapping()[mode]
