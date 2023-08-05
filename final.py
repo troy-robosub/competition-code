@@ -494,6 +494,15 @@ def adjust_angle_neg(angle):
     time.sleep(2)
     roll(0)
 
+def set_servo(self, servo, pwm): #added by derek
+    ''' Set a single servo output pwm value.
+    'servo' can only be outputs that aren't assigned as motors, so is
+      generally used for lights/camera etc.
+    When in a per_thruster_control context in Servo mode, also allows
+      controlling individual thrusters.
+    '''
+    self.master.set_servo(servo, pwm)
+
 set_mode("ALT_HOLD")
 count =0
 while True:
